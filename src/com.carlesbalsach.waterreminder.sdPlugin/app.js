@@ -131,7 +131,6 @@ class ReminderAction {
         this.updatePercentage();
 
         if (this.percentage === 0) {
-            this.playSound();
             this.percentage = -1;
         }
 
@@ -173,7 +172,7 @@ class ReminderAction {
     playSound() {
         if (this.settings.playSound) {
             const tt0 = this.getTimeDeltaToZero();
-            if (tt0 > -3 && tt0 < 3) { // This is to avoid playing sounds if coming back to the tab long after the timer has reached 0.
+            if (tt0 > -1 && tt0 < 1) { // This is to avoid playing sounds if coming back to the tab long after the timer has reached 0.
                 const audio = new Audio("assets/drop_sound.mp3");
                 audio
                     .play()
@@ -217,6 +216,7 @@ class ReminderAction {
     }
 
     getEmptySVGImage() {
+		this.playSound();
         return `
 			<svg width="512px" height="512px" viewBox="0 0 100 100" id="Line" xmlns="http://www.w3.org/2000/svg">
   
