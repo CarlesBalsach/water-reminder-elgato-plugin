@@ -15,12 +15,26 @@ reminderAction.onWillAppear(({ context, payload }) => {
         settings.lastDrankTime = new Date(); // Set default if not found
     }
 
+    // A context can appear more than once without a willDisappear in between, so the
+    // cached instance's timer has to be stopped before the instance is replaced. Once
+    // MACTIONS[context] is overwritten the old interval is unreachable and can never be
+    // cleared, and it keeps drawing its own stale percentage over the new instance's
+    // image, which makes the key flicker between the old and the new state.
+    const previousInstance = MACTIONS[context];
+    if (previousInstance && previousInstance.interval) {
+        clearInterval(previousInstance.interval);
+    }
+
     MACTIONS[context] = new ReminderAction(context, payload);
 });
 
 reminderAction.onWillDisappear(({ context }) => {
-    // console.log('will disappear', context);
-    MACTIONS[context].interval && clearInterval(MACTIONS[context].interval);
+    // A willDisappear can arrive for a context that was never cached, for example when the
+    // plugin is reloaded while a profile switch is in flight.
+    const actionInstance = MACTIONS[context];
+    if (!actionInstance) return;
+
+    if (actionInstance.interval) clearInterval(actionInstance.interval);
     delete MACTIONS[context];
 });
 
